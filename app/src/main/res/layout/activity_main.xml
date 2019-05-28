@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/activity_main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <com.eric.android.view.excelpanel.ExcelPanel
+        android:id="@+id/excel_panel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cell_text_color="@color/colorAccent"
+        app:cell_text_size="12"
+        app:header_text_color_1="@color/colorPrimaryDark"
+        app:header_text_size="18"
+        app:header_width="80dp"
+        app:cell_gap="15dp"
+        app:row_divider_color="@color/bg_line"
+        app:row_divider_height="20dp" />
+</LinearLayout>

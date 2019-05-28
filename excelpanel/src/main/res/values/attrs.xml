@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ExcelPanel">
+        <attr name="header_width" format="dimension" />
+        <attr name="header_text_size" format="integer" />
+        <attr name="header_text_color_1" format="color" />
+        <attr name="header_text_color_2" format="color" />
+        <attr name="cell_width" format="dimension" />
+        <attr name="cell_text_color" format="color" />
+        <attr name="cell_text_size" format="integer" />
+        <attr name="cell_gap" format="dimension" />
+        <attr name="row_divider_height" format="dimension" />
+        <attr name="row_divider_color" format="color" />
+    </declare-styleable>
+</resources>
