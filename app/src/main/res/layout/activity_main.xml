@@ -1,22 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <Button
+        android:id="@+id/btn_left"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="left"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btn_right"
+        android:layout_width="80dp"
+        android:layout_height="wrap_content"
+        android:text="right"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_year"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/btn_left"
+        app:layout_constraintTop_toTopOf="parent" />
+
+
     <com.eric.android.view.excelpanel.ExcelPanel
         android:id="@+id/excel_panel"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:cell_gap="15dp"
         app:cell_text_color="@color/colorAccent"
         app:cell_text_size="12"
+        app:cell_width="130dp"
         app:header_text_color_1="@color/colorPrimaryDark"
         app:header_text_color_2="@color/tab_text_color"
         app:header_text_size="18"
         app:header_width="80dp"
-        app:cell_gap="15dp"
+        app:layout_constraintTop_toBottomOf="@+id/btn_left"
         app:row_divider_color="@color/bg_line"
         app:row_divider_height="20dp" />
-</LinearLayout>
+</android.support.constraint.ConstraintLayout>

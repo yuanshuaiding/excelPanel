@@ -7,6 +7,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -18,6 +19,8 @@ import com.eric.android.view.excelpanel.bean.ExcelPanelRow;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.eric.android.view.excelpanel.util.DPUtil.dp2px;
 
 public class ExcelPanel extends FrameLayout {
     private final RecyclerView recycleMain;
@@ -31,6 +34,10 @@ public class ExcelPanel extends FrameLayout {
     private int cellTxtSize;
     private int rowDividerColor;
     private int rowDividerHeight;
+    private RecyclerView outRecycleView;
+    private MainAdapter mainAdapter;
+    private int outScrolledX;//记录滚动距离
+    private boolean fromClick;
 
     public ExcelPanel(@NonNull Context context) {
         this(context, null);
@@ -64,27 +71,80 @@ public class ExcelPanel extends FrameLayout {
         }
     }
 
-
-    private int dp2px(Context context, float dp) {
-        final float density = context.getResources().getDisplayMetrics().density;
-        return (int) (density * dp + 0.5f);
-    }
-
     /**
      * 设置数据源(header列表需要指定标题级别,用于设置样式)
      */
     public void setDatas(List<ExcelPanelRow> rows) {
-        recycleMain.setAdapter(new MainAdapter(rows));
+        mainAdapter = new MainAdapter(rows);
+        recycleMain.setAdapter(mainAdapter);
+    }
+
+    public void setUpScroll(RecyclerView recyclerView) {
+        if (recyclerView == null) return;
+        outRecycleView = recyclerView;
+        if (mainAdapter != null) {
+            mainAdapter.recyleViewRows.add(outRecycleView);
+        }
+        recyclerView.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View view, MotionEvent motionEvent) {
+                if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                    if (mainAdapter != null) {
+                        //其他recycleView禁止滑动
+                        for (RecyclerView rv : mainAdapter.recyleViewRows) {
+                            rv.stopScroll();
+                        }
+                        mainAdapter.touchView = view;
+                    }
+                }
+                return false;
+            }
+        });
+        recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
+            @Override
+            public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                if (fromClick) return;
+                outScrolledX += dx;
+                Log.e("OutRecycle_scrolled", outScrolledX + "");
+                if (mainAdapter != null) {
+                    if (recyclerView != mainAdapter.touchView) return;//防止重复滚动
+                    mainAdapter.scrollRows(recyclerView, dx, dy);
+                }
+            }
+        });
+    }
+
+    /**
+     * 往左滚动一列
+     */
+    public void goLeft() {
+        fromClick = true;
+        if (outRecycleView != null) {
+            mainAdapter.goLeft(outScrolledX);
+        }
+        fromClick = false;
+    }
+
+    /**
+     * 往右滚动一列
+     */
+    public void goRight() {
+        fromClick = true;
+        if (mainAdapter != null) {
+            mainAdapter.goRight(outScrolledX);
+        }
+        fromClick = false;
     }
 
     private class MainAdapter extends RecyclerView.Adapter<VH> {
-        private final List<ExcelPanelRow> datas;
-        private final List<RecyclerView> recyleViewRows = new ArrayList<>();
-        private View touchView;
+        List<ExcelPanelRow> datas;
+        View touchView;
+        List<RecyclerView> recyleViewRows = new ArrayList<>();
 
         MainAdapter(List<ExcelPanelRow> datas) {
             this.datas = datas;
         }
+
 
         @NonNull
         @Override
@@ -114,11 +174,13 @@ public class ExcelPanel extends FrameLayout {
             holder.recyclerViewRow.setOnTouchListener(new OnTouchListener() {
                 @Override
                 public boolean onTouch(View view, MotionEvent motionEvent) {
-                    //其他recycleView禁止滑动
-                    for (RecyclerView rv : recyleViewRows) {
-                        rv.stopScroll();
+                    if (motionEvent.getAction() == MotionEvent.ACTION_DOWN) {
+                        //其他recycleView禁止滑动
+                        for (RecyclerView rv : recyleViewRows) {
+                            rv.stopScroll();
+                        }
+                        touchView = view;
                     }
-                    touchView = view;
                     return false;
                 }
             });
@@ -127,11 +189,7 @@ public class ExcelPanel extends FrameLayout {
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     if (recyclerView != touchView) return;//防止重复滚动
                     //同步其他recycleview滚动
-                    for (RecyclerView rv : recyleViewRows) {
-                        if (rv != recyclerView) {
-                            rv.scrollBy(dx, dy);
-                        }
-                    }
+                    scrollRows(recyclerView, dx, dy);
                 }
 
                 @Override
@@ -141,11 +199,7 @@ public class ExcelPanel extends FrameLayout {
                     if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                         if (recyclerView != touchView) return;//防止重复滚动
                         //同步其他recycleview滚动
-                        for (RecyclerView rv : recyleViewRows) {
-                            if (rv != recyclerView) {
-                                rv.scrollBy(recyclerView.getScrollX(), recyclerView.getScrollY());
-                            }
-                        }
+                        scrollRows(recyclerView, recyclerView.getScrollX(), recyclerView.getScrollY());
                     }
                 }
             });
@@ -154,6 +208,41 @@ public class ExcelPanel extends FrameLayout {
         @Override
         public int getItemCount() {
             return datas == null ? 0 : datas.size();
+        }
+
+        private void smoothScrollRows(RecyclerView recyclerView, int dx, int dy) {
+            if (dx == 0) return;
+            for (RecyclerView rv : recyleViewRows) {
+                if (rv != recyclerView) {
+                    rv.smoothScrollBy(dx, dy);
+                }
+            }
+        }
+
+        public void scrollRows(RecyclerView recyclerView, int dx, int dy) {
+            if (dx == 0) return;
+            for (RecyclerView rv : recyleViewRows) {
+                if (rv != recyclerView) {
+                    rv.scrollBy(dx, dy);
+                }
+            }
+        }
+
+        public void goLeft(int outScrolledX) {
+            int columnWidth = cellWidth + cellGap;
+            int gap = outScrolledX % columnWidth;
+            touchView = null;
+            smoothScrollRows(null, columnWidth - gap, 0);
+        }
+
+        public void goRight(int outScrolledX) {
+            int columnWidth = cellWidth + cellGap;
+            int gap = outScrolledX % columnWidth;
+            touchView = null;
+            if (gap == 0) {
+                gap = columnWidth;
+            }
+            smoothScrollRows(null, -gap, 0);
         }
     }
 
@@ -171,7 +260,7 @@ public class ExcelPanel extends FrameLayout {
         }
     }
 
-    private class RowAdapter extends RecyclerView.Adapter<RHV> {
+    public class RowAdapter extends RecyclerView.Adapter<ExcelRowVH> {
 
         private final List<ExcelPanelRow.RowItem> cells;
 
@@ -181,18 +270,19 @@ public class ExcelPanel extends FrameLayout {
 
         @NonNull
         @Override
-        public RHV onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new RHV(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_excel_panel_row_cell, parent, false));
+        public ExcelRowVH onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+            return new ExcelRowVH(LayoutInflater.from(parent.getContext()).inflate(R.layout.layout_excel_panel_row_cell, parent, false));
         }
 
         @Override
-        public void onBindViewHolder(@NonNull RHV holder, int position) {
+        public void onBindViewHolder(@NonNull ExcelRowVH holder, int position) {
             if (position == 0) {
                 holder.cellGapView.setVisibility(GONE);
             } else {
                 holder.cellGapView.setVisibility(VISIBLE);
             }
             holder.cellGapView.getLayoutParams().width = cellGap;
+            holder.tvCell.getLayoutParams().width = cellWidth;
             holder.tvCell.setTextColor(cellTxtColor);
             holder.tvCell.setTextSize(cellTxtSize);
             holder.tvCell.setText(cells.get(position).getContent());
@@ -204,11 +294,11 @@ public class ExcelPanel extends FrameLayout {
         }
     }
 
-    private static class RHV extends RecyclerView.ViewHolder {
-        View cellGapView;
-        TextView tvCell;
+    public static class ExcelRowVH extends RecyclerView.ViewHolder {
+        public View cellGapView;
+        public TextView tvCell;
 
-        public RHV(View itemView) {
+        public ExcelRowVH(View itemView) {
             super(itemView);
             cellGapView = itemView.findViewById(R.id.cell_gap);
             tvCell = itemView.findViewById(R.id.tv_cell);
