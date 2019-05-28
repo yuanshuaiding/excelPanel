@@ -23,6 +23,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i1 = 0; i1 < i; i1++) {
             ExcelPanelRow row = new ExcelPanelRow();
             row.header = "标题" + i1;
+            row.headerLevel = i1 % 3;
             row.rowItems = new ArrayList<>();
             int j = 10;
             for (int i2 = 0; i2 < j; i2++) {
