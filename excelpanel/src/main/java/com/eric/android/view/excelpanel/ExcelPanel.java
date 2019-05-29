@@ -37,7 +37,6 @@ public class ExcelPanel extends FrameLayout {
     private RecyclerView outRecycleView;
     private MainAdapter mainAdapter;
     private int outScrolledX;//记录滚动距离
-    private boolean fromClick;
 
     public ExcelPanel(@NonNull Context context) {
         this(context, null);
@@ -103,7 +102,6 @@ public class ExcelPanel extends FrameLayout {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
-                if (fromClick) return;
                 outScrolledX += dx;
                 Log.e("OutRecycle_scrolled", outScrolledX + "");
                 if (mainAdapter != null) {
@@ -118,22 +116,18 @@ public class ExcelPanel extends FrameLayout {
      * 往左滚动一列
      */
     public void goLeft() {
-        fromClick = true;
         if (outRecycleView != null) {
             mainAdapter.goLeft(outScrolledX);
         }
-        fromClick = false;
     }
 
     /**
      * 往右滚动一列
      */
     public void goRight() {
-        fromClick = true;
         if (mainAdapter != null) {
             mainAdapter.goRight(outScrolledX);
         }
-        fromClick = false;
     }
 
     private class MainAdapter extends RecyclerView.Adapter<VH> {

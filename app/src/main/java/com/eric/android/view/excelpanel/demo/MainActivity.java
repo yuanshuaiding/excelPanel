@@ -45,7 +45,10 @@ public class MainActivity extends AppCompatActivity {
             row.rowItems = new ArrayList<>();
             for (int i2 = 0; i2 < j; i2++) {
                 ExcelPanelRow.RowItem rowItem = new ExcelPanelRow.RowItem();
-                rowItem.content = "单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格" + i2;
+                if (row.headerLevel == 0)
+                    rowItem.content = null;
+                else
+                    rowItem.content = "单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格" + i2;
                 row.rowItems.add(rowItem);
             }
             rows.add(row);
