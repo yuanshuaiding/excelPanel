@@ -2,6 +2,7 @@ package com.eric.android.view.excelpanel;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Paint;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -67,6 +68,7 @@ public class ExcelPanel extends FrameLayout {
             cellTxtSize = typedArray.getInt(R.styleable.ExcelPanel_cell_text_size, 14);
             rowDividerColor = typedArray.getInt(R.styleable.ExcelPanel_row_divider_color, 0xffffffff);
             rowDividerHeight = typedArray.getDimensionPixelSize(R.styleable.ExcelPanel_row_divider_height, 0);
+            typedArray.recycle();
         }
     }
 
@@ -257,6 +259,7 @@ public class ExcelPanel extends FrameLayout {
     public class RowAdapter extends RecyclerView.Adapter<ExcelRowVH> {
 
         private final List<ExcelPanelRow.RowItem> cells;
+        private int cellHight;
 
         RowAdapter(List<ExcelPanelRow.RowItem> cells) {
             this.cells = cells;
@@ -270,16 +273,37 @@ public class ExcelPanel extends FrameLayout {
 
         @Override
         public void onBindViewHolder(@NonNull ExcelRowVH holder, int position) {
+            holder.tvCell.setTextColor(cellTxtColor);
+            holder.tvCell.setTextSize(cellTxtSize);
             if (position == 0) {
                 holder.cellGapView.setVisibility(GONE);
+                measureCellHight(holder.tvCell);
             } else {
                 holder.cellGapView.setVisibility(VISIBLE);
             }
             holder.cellGapView.getLayoutParams().width = cellGap;
+            String content = cells.get(position).getContent();
             holder.tvCell.getLayoutParams().width = cellWidth;
-            holder.tvCell.setTextColor(cellTxtColor);
-            holder.tvCell.setTextSize(cellTxtSize);
-            holder.tvCell.setText(cells.get(position).getContent());
+            if (cellHight > 0)
+                holder.tvCell.getLayoutParams().height = cellHight;
+            holder.tvCell.setText(content);
+        }
+
+        private void measureCellHight(TextView tvCell) {
+            //计算出单元格高度
+            Paint cellPaint = tvCell.getPaint();
+            if (cellPaint != null) {
+                for (ExcelPanelRow.RowItem cell : cells) {
+                    float txtRows = cellPaint.measureText(cell.getContent()) / cellWidth;
+                    if (txtRows == 0) {
+                        txtRows = 1;
+                    }
+                    int h = (int) (tvCell.getLineHeight() * Math.ceil(txtRows));
+                    if (h > cellHight) {
+                        cellHight = h;
+                    }
+                }
+            }
         }
 
         @Override

@@ -47,8 +47,13 @@ public class MainActivity extends AppCompatActivity {
                 ExcelPanelRow.RowItem rowItem = new ExcelPanelRow.RowItem();
                 if (row.headerLevel == 0)
                     rowItem.content = null;
-                else
-                    rowItem.content = "单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格单元格" + i2;
+                else {
+                    if(i2==5) {
+                        rowItem.content = "格单元格单元格格单元格单元格格单元格单格单元格单元格格单元格单元格单元格元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格" + i2;
+                    }else {
+                        rowItem.content = "格单元格单元格" + i2;
+                    }
+                }
                 row.rowItems.add(rowItem);
             }
             rows.add(row);
