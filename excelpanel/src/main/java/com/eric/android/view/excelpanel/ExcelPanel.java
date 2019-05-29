@@ -7,6 +7,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -153,13 +154,18 @@ public class ExcelPanel extends FrameLayout {
             ExcelPanelRow item = datas.get(position);
             holder.tvHeader.setText(item.getHeader());
             holder.tvHeader.getLayoutParams().width = headerWidth;
+            holder.tvHeader.setPadding(0, 0, 0, rowDividerHeight);
             holder.spacer.getLayoutParams().height = rowDividerHeight;
             holder.spacer.setBackgroundColor(rowDividerColor);
             holder.recyclerViewRow.setPadding(0, 0, 0, rowDividerHeight);
-            if (item.headerLevel == 0)
+            TextPaint paint = holder.tvHeader.getPaint();
+            if (item.headerLevel == 0) {
                 holder.tvHeader.setTextColor(headerColor1);
-            else
+                paint.setFakeBoldText(true);
+            } else {
                 holder.tvHeader.setTextColor(headerColor2);
+                paint.setFakeBoldText(false);
+            }
             if (!recyleViewRows.contains(holder.recyclerViewRow)) {
                 recyleViewRows.add(holder.recyclerViewRow);
             }
