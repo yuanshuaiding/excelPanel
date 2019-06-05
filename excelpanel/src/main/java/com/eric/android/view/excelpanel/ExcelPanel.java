@@ -9,7 +9,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextPaint;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -39,6 +38,7 @@ public class ExcelPanel extends FrameLayout {
     private RecyclerView outRecycleView;
     private MainAdapter mainAdapter;
     private int outScrolledX;//记录滚动距离
+    private ExcelPanelScrollListener onExcelPanelScrollListener;
 
     public ExcelPanel(@NonNull Context context) {
         this(context, null);
@@ -81,6 +81,10 @@ public class ExcelPanel extends FrameLayout {
         recycleMain.setAdapter(mainAdapter);
     }
 
+    public void setOnScrollListener(ExcelPanelScrollListener onScrollListener) {
+        this.onExcelPanelScrollListener = onScrollListener;
+    }
+
     public void setUpScroll(RecyclerView recyclerView) {
         if (recyclerView == null) return;
         outRecycleView = recyclerView;
@@ -105,11 +109,18 @@ public class ExcelPanel extends FrameLayout {
         recyclerView.addOnScrollListener(new RecyclerView.OnScrollListener() {
             @Override
             public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+                //Log.e("OutRecycle_scrolled", outScrolledX + "");
                 outScrolledX += dx;
-                Log.e("OutRecycle_scrolled", outScrolledX + "");
                 if (mainAdapter != null) {
                     if (recyclerView != mainAdapter.touchView) return;//防止重复滚动
                     mainAdapter.scrollRows(recyclerView, dx, dy);
+                }
+            }
+
+            @Override
+            public void onScrollStateChanged(RecyclerView recyclerView, int newState) {
+                if (onExcelPanelScrollListener != null) {
+                    onExcelPanelScrollListener.onScrollStateChanged(ExcelPanel.this, newState);
                 }
             }
         });
@@ -190,6 +201,7 @@ public class ExcelPanel extends FrameLayout {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
                     if (recyclerView != touchView) return;//防止重复滚动
+                    //Log.d("ExcelPanelRow", this.toString());
                     //同步其他recycleview滚动
                     scrollRows(recyclerView, dx, dy);
                 }
@@ -202,6 +214,9 @@ public class ExcelPanel extends FrameLayout {
                         if (recyclerView != touchView) return;//防止重复滚动
                         //同步其他recycleview滚动
                         scrollRows(recyclerView, recyclerView.getScrollX(), recyclerView.getScrollY());
+                    }
+                    if (onExcelPanelScrollListener != null) {
+                        onExcelPanelScrollListener.onScrollStateChanged(ExcelPanel.this, newState);
                     }
                 }
             });
@@ -227,6 +242,9 @@ public class ExcelPanel extends FrameLayout {
                 if (rv != recyclerView) {
                     rv.scrollBy(dx, dy);
                 }
+            }
+            if (onExcelPanelScrollListener != null) {
+                onExcelPanelScrollListener.onScrolled(ExcelPanel.this, dx, dy);
             }
         }
 

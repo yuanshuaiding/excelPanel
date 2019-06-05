@@ -5,12 +5,14 @@ import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.eric.android.view.excelpanel.ExcelPanel;
+import com.eric.android.view.excelpanel.ExcelPanelScrollListener;
 import com.eric.android.view.excelpanel.bean.ExcelPanelRow;
 
 import java.util.ArrayList;
@@ -48,9 +50,9 @@ public class MainActivity extends AppCompatActivity {
                 if (row.headerLevel == 0)
                     rowItem.content = null;
                 else {
-                    if(i2==5) {
+                    if (i2 == 5) {
                         rowItem.content = "格单元格单元格格单元格单元格格单元格单格单元格单元格格单元格单元格单元格元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格格单元格单元格" + i2;
-                    }else {
+                    } else {
                         rowItem.content = "格单元格单元格" + i2;
                     }
                 }
@@ -65,7 +67,17 @@ public class MainActivity extends AppCompatActivity {
         excelPanel.setDatas(rows);
         recycler_year.setAdapter(new MyAdapter());
         excelPanel.setUpScroll(recycler_year);
+        excelPanel.setOnScrollListener(new ExcelPanelScrollListener() {
+            @Override
+            public void onScrolled(ExcelPanel excelPanel, int dx, int dy) {
+                Log.d("MainActivityExcelScroll", "dx=" + dx + ",dy=" + dy);
+            }
 
+            @Override
+            public void onScrollStateChanged(ExcelPanel excelPanel, int newState) {
+                Log.d("MainActivityExcelScroll", "newState=" + newState);
+            }
+        });
         Button btnL = findViewById(R.id.btn_left);
         Button btnR = findViewById(R.id.btn_right);
         btnL.setOnClickListener(new View.OnClickListener() {
