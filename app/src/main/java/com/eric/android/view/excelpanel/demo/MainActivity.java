@@ -10,9 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.eric.android.view.excelpanel.ExcelPanel;
-import com.eric.android.view.excelpanel.ExcelPanelScrollListener;
+import com.eric.android.view.excelpanel.OnExcelPanelScrollListener;
+import com.eric.android.view.excelpanel.OnExcelPanelTextCopyListener;
 import com.eric.android.view.excelpanel.bean.ExcelPanelRow;
 
 import java.util.ArrayList;
@@ -67,7 +69,13 @@ public class MainActivity extends AppCompatActivity {
         excelPanel.setDatas(rows);
         recycler_year.setAdapter(new MyAdapter());
         excelPanel.setUpScroll(recycler_year);
-        excelPanel.setOnScrollListener(new ExcelPanelScrollListener() {
+        excelPanel.canCopy(true, new OnExcelPanelTextCopyListener() {
+            @Override
+            public void onCopy(String text) {
+                Toast.makeText(MainActivity.this, text, Toast.LENGTH_SHORT).show();
+            }
+        });
+        excelPanel.setOnScrollListener(new OnExcelPanelScrollListener() {
             @Override
             public void onScrolled(ExcelPanel excelPanel, int dx, int dy) {
                 Log.d("MainActivityExcelScroll", "dx=" + dx + ",dy=" + dy);

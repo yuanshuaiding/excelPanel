@@ -8,6 +8,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextPaint;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -17,6 +18,8 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 
 import com.eric.android.view.excelpanel.bean.ExcelPanelRow;
+import com.eric.android.view.excelpanel.util.RecycleViewUtil;
+import com.eric.android.view.excelpanel.util.ViewUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,7 +41,9 @@ public class ExcelPanel extends FrameLayout {
     private RecyclerView outRecycleView;
     private MainAdapter mainAdapter;
     private int outScrolledX;//记录滚动距离
-    private ExcelPanelScrollListener onExcelPanelScrollListener;
+    private OnExcelPanelScrollListener onExcelPanelScrollListener;
+    private boolean canCopy;
+    private OnExcelPanelTextCopyListener textCopyListener;
 
     public ExcelPanel(@NonNull Context context) {
         this(context, null);
@@ -81,8 +86,13 @@ public class ExcelPanel extends FrameLayout {
         recycleMain.setAdapter(mainAdapter);
     }
 
-    public void setOnScrollListener(ExcelPanelScrollListener onScrollListener) {
+    public void setOnScrollListener(OnExcelPanelScrollListener onScrollListener) {
         this.onExcelPanelScrollListener = onScrollListener;
+    }
+
+    public void canCopy(boolean canCopy, OnExcelPanelTextCopyListener textCopyListener) {
+        this.canCopy = canCopy;
+        this.textCopyListener = textCopyListener;
     }
 
     public void setUpScroll(RecyclerView recyclerView) {
@@ -197,6 +207,22 @@ public class ExcelPanel extends FrameLayout {
                     return false;
                 }
             });
+            if (canCopy) {
+                new RecycleViewUtil(getContext(), holder.recyclerViewRow).setOnItemLongClickListener(new RecycleViewUtil.OnItemLongClickListener() {
+                    @Override
+                    public void onItemLongClick(int position, View view) {
+                        if (view != null) {
+                            TextView tvCell = view.findViewById(R.id.tv_cell);
+                            if (tvCell != null) {
+                                ViewUtil.copyText(getContext(), tvCell);
+                                if (textCopyListener != null && !TextUtils.isEmpty(tvCell.getText())) {
+                                    textCopyListener.onCopy(tvCell.getText().toString());
+                                }
+                            }
+                        }
+                    }
+                });
+            }
             holder.recyclerViewRow.addOnScrollListener(new RecyclerView.OnScrollListener() {
                 @Override
                 public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
@@ -296,7 +322,7 @@ public class ExcelPanel extends FrameLayout {
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ExcelRowVH holder, int position) {
+        public void onBindViewHolder(@NonNull final ExcelRowVH holder, int position) {
             holder.tvCell.setTextColor(cellTxtColor);
             holder.tvCell.setTextSize(cellTxtSize);
             if (position == 0) {
