@@ -10,12 +10,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eric.android.view.excelpanel.ExcelPanel;
 import com.eric.android.view.excelpanel.OnExcelPanelScrollListener;
 import com.eric.android.view.excelpanel.OnExcelPanelTextCopyListener;
 import com.eric.android.view.excelpanel.bean.ExcelPanelRow;
+import com.eric.android.view.excelpanel.util.RecycleViewUtil;
+import com.eric.android.view.excelpanel.util.ViewUtil;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -68,6 +71,16 @@ public class MainActivity extends AppCompatActivity {
         }
         excelPanel.setDatas(rows);
         recycler_year.setAdapter(new MyAdapter());
+        new RecycleViewUtil(MainActivity.this, recycler_year).setOnItemLongClickListener(new RecycleViewUtil.OnItemLongClickListener() {
+            @Override
+            public void onItemLongClick(int position, View view) {
+                TextView tvHeader = view.findViewById(R.id.tv_cell);
+                if (tvHeader != null) {
+                    ViewUtil.copyText(MainActivity.this, tvHeader);
+                    Toast.makeText(MainActivity.this, tvHeader.getText(), Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
         excelPanel.setUpScroll(recycler_year);
         excelPanel.canCopy(true, new OnExcelPanelTextCopyListener() {
             @Override
