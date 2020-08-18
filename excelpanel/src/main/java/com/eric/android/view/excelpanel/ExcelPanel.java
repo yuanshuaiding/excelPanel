@@ -348,7 +348,7 @@ public class ExcelPanel extends FrameLayout {
                     if (txtRows == 0) {
                         txtRows = 1;
                     }
-                    int h = (int) (tvCell.getLineHeight() * Math.ceil(txtRows));
+                    int h = (int) (tvCell.getLineHeight() * Math.ceil(txtRows)) + dp2px(getContext(), 3);
                     if (h > cellHight) {
                         cellHight = h;
                     }
